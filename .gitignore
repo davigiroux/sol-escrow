@@ -1,0 +1,25 @@
+# Anchor
+target/
+.anchor/
+test-ledger/
+
+# Node
+node_modules/
+.pnpm-store/
+
+# Solana
+*.so
+
+# Env
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
