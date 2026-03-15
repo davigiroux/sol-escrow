@@ -31,14 +31,17 @@ jobs:
 
       - name: Install Solana CLI
         run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/v$SOLANA_VERSION/install)"
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+          sh -c "$(curl -sSfL https://release.anza.xyz/v${SOLANA_VERSION}/install)"
+          echo "${HOME}/.local/share/solana/install/active_release/bin" >> "${GITHUB_PATH}"
+          export PATH="${HOME}/.local/share/solana/install/active_release/bin:${PATH}"
+          solana --version
 
       - name: Install Anchor CLI
         run: |
           cargo install --git https://github.com/coral-xyz/anchor avm --force
-          avm install $ANCHOR_VERSION
-          avm use $ANCHOR_VERSION
+          avm install "${ANCHOR_VERSION}"
+          avm use "${ANCHOR_VERSION}"
+          anchor --version
 
       - name: Setup Node
         uses: actions/setup-node@v4
