@@ -19,13 +19,11 @@ jobs:
 
       - name: Install Solana CLI
         run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
+          sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)" -- --no-modify-path
           SOLANA_BIN="${HOME}/.local/share/solana/install/active_release/bin"
-          # Symlink only solana binaries — do NOT add the full dir to PATH
-          # because it contains cargo/rustc 1.79 that would shadow the real toolchain
-          for cmd in solana solana-keygen solana-test-validator solana-validator; do
-            [ -f "${SOLANA_BIN}/${cmd}" ] && sudo ln -sf "${SOLANA_BIN}/${cmd}" "/usr/local/bin/${cmd}"
-          done
+          rm -f "${SOLANA_BIN}/cargo" "${SOLANA_BIN}/rustc" "${SOLANA_BIN}/rustup" "${SOLANA_BIN}/rustfmt" "${SOLANA_BIN}/cargo-fmt"
+          echo "${SOLANA_BIN}" >> "$GITHUB_PATH"
+          export PATH="${SOLANA_BIN}:${PATH}"
           solana --version
 
       - name: Install Rust
