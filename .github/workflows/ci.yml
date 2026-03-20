@@ -20,8 +20,11 @@ jobs:
       - name: Install Solana CLI
         run: |
           sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
-          echo "${HOME}/.local/share/solana/install/active_release/bin" >> "${GITHUB_PATH}"
-          export PATH="${HOME}/.local/share/solana/install/active_release/bin:${PATH}"
+          SOLANA_BIN="${HOME}/.local/share/solana/install/active_release/bin"
+          echo "${SOLANA_BIN}" >> "${GITHUB_PATH}"
+          # Remove Solana-bundled cargo/rustc so they don't shadow the real toolchain
+          rm -f "${SOLANA_BIN}/cargo" "${SOLANA_BIN}/rustc" "${SOLANA_BIN}/rustup"
+          export PATH="${SOLANA_BIN}:${PATH}"
           solana --version
 
       - name: Install Rust
