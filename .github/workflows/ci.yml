@@ -19,7 +19,9 @@ jobs:
 
       - name: Install Solana CLI
         run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)" -- --no-modify-path
+          sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
+          # Strip profile PATH mod so bundled cargo 1.79 doesn't shadow system cargo
+          sed -i '/\.local\/share\/solana/d' ~/.profile 2>/dev/null || true
           SOLANA_BIN="${HOME}/.local/share/solana/install/active_release/bin"
           rm -f "${SOLANA_BIN}/cargo" "${SOLANA_BIN}/rustc" "${SOLANA_BIN}/rustup" "${SOLANA_BIN}/rustfmt" "${SOLANA_BIN}/cargo-fmt"
           echo "${SOLANA_BIN}" >> "$GITHUB_PATH"
