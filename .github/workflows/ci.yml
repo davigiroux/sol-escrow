@@ -27,21 +27,6 @@ jobs:
           export PATH="${HOME}/.local/share/solana/install/active_release/bin:${PATH}"
           solana --version
 
-      # Anchor calls `cargo +solana build`. Solana's installer registers a
-      # "solana" rustup toolchain, but its Cargo (1.84) can't parse
-      # edition2024 crates. Link the Solana SDK into the stable toolchain's
-      # sysroot so `cargo +solana` uses the newer Cargo while still finding
-      # the Solana BPF/SBF targets.
-      - name: Fix Solana toolchain for edition2024 compat
-        run: |
-          SOLANA_TOOLCHAIN="${HOME}/.local/share/solana/install/active_release/bin/sdk/sbf/dependencies/platform-tools/rust"
-          # If the solana toolchain exists in rustup, remove it and re-link with stable
-          rustup toolchain remove solana 2>/dev/null || true
-          rustup toolchain link solana "$(rustup run stable rustc --print sysroot)"
-          # Verify
-          cargo +solana --version
-          rustc +solana --version
-
       - name: Cache Cargo
         uses: actions/cache@v4
         with:
