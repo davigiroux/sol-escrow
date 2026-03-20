@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  SOLANA_VERSION: "v2.3.0"
+  ANCHOR_VERSION: "0.32.1"
+
 jobs:
   program:
     name: Build & Test Program
@@ -13,11 +17,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: metadaoproject/setup-anchor@v3.1
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
+          echo "${HOME}/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+          export PATH="${HOME}/.local/share/solana/install/active_release/bin:${PATH}"
+          solana --version
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
         with:
-          anchor-version: '0.32.1'
-          solana-cli-version: '2.3.0'
-          node-version: '20'
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.avm
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Anchor CLI
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor avm --force
+          avm install "${ANCHOR_VERSION}"
+          avm use "${ANCHOR_VERSION}"
+          anchor --version
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
