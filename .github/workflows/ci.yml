@@ -63,6 +63,10 @@ jobs:
       - name: Generate keypair
         run: solana-keygen new --no-bip39-passphrase --force
 
+      - name: Downgrade incompatible dependencies
+        run: |
+          cargo update --precise 0.3.1 -p constant_time_eq
+
       - name: Build program
         run: anchor build
 
