@@ -19,7 +19,7 @@ jobs:
 
       - name: Install Solana CLI
         run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
+          sh -c "$(curl -sSfL https://release.anza.xyz{SOLANA_VERSION}/install)"
           # Strip profile PATH mod so bundled cargo 1.79 doesn't shadow system cargo
           sed -i '/\.local\/share\/solana/d' ~/.profile 2>/dev/null || true
           SOLANA_BIN="${HOME}/.local/share/solana/install/active_release/bin"
@@ -42,7 +42,7 @@ jobs:
 
       - name: Install Anchor CLI
         run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --force
+          cargo install --git https://github.com avm --force
           avm install "${ANCHOR_VERSION}"
           avm use "${ANCHOR_VERSION}"
           anchor --version
@@ -62,6 +62,12 @@ jobs:
 
       - name: Generate keypair
         run: solana-keygen new --no-bip39-passphrase --force
+
+      - name: Downgrade incompatible dependencies
+        run: |
+          # constant_time_eq 0.4.x requires Edition 2024, which Solana's Cargo 1.79 doesn't support.
+          # We force it to 0.3.1 which uses Edition 2021.
+          cargo update --precise 0.3.1 -p constant_time_eq
 
       - name: Build program
         run: anchor build
