@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  SOLANA_VERSION: "v2.1.21"
-  ANCHOR_VERSION: "0.32.1"
-
 jobs:
   program:
     name: Build & Test Program
@@ -17,40 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Solana CLI
-        run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
-          # Strip profile PATH mod so bundled cargo 1.79 doesn't shadow system cargo
-          sed -i '/\.local\/share\/solana/d' ~/.profile 2>/dev/null || true
-          SOLANA_BIN="${HOME}/.local/share/solana/install/active_release/bin"
-          rm -f "${SOLANA_BIN}/cargo" "${SOLANA_BIN}/rustc" "${SOLANA_BIN}/rustup" "${SOLANA_BIN}/rustfmt" "${SOLANA_BIN}/cargo-fmt"
-          echo "${SOLANA_BIN}" >> "$GITHUB_PATH"
-          export PATH="${SOLANA_BIN}:${PATH}"
-          solana --version
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Cargo
-        uses: actions/cache@v4
+      - uses: metadaoproject/setup-anchor@v3.1
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Install Anchor CLI
-        run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --force
-          avm install "${ANCHOR_VERSION}"
-          avm use "${ANCHOR_VERSION}"
-          anchor --version
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+          anchor-version: '0.32.1'
+          solana-cli-version: '2.3.0'
+          node-version: '20'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -62,10 +29,6 @@ jobs:
 
       - name: Generate keypair
         run: solana-keygen new --no-bip39-passphrase --force
-
-      - name: Downgrade incompatible dependencies
-        run: |
-          cargo update --precise 0.3.1 -p constant_time_eq
 
       - name: Build program
         run: anchor build
