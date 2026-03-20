@@ -12,7 +12,7 @@ pub mod escrow {
 
     pub fn make_escrow(
         _ctx: Context<MakeEscrow>,
-        _seed: u64,
+        seed: u64,
         _amount_a: u64,
         _amount_b: u64,
     ) -> Result<()> {

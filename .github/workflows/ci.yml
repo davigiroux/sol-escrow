@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  SOLANA_VERSION: "stable"
+  SOLANA_VERSION: "v2.3.0"
   ANCHOR_VERSION: "0.32.1"
 
 jobs:
@@ -20,21 +20,21 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
+          echo "${HOME}/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+          export PATH="${HOME}/.local/share/solana/install/active_release/bin:${PATH}"
+          solana --version
+
       - name: Cache Cargo
         uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
+            ~/.avm
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Install Solana CLI
-        run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/${SOLANA_VERSION}/install)"
-          echo "${HOME}/.local/share/solana/install/active_release/bin" >> "${GITHUB_PATH}"
-          export PATH="${HOME}/.local/share/solana/install/active_release/bin:${PATH}"
-          solana --version
 
       - name: Install Anchor CLI
         run: |
