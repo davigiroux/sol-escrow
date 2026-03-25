@@ -37,7 +37,7 @@ pub mod escrow {
         // Transfer Token A from maker → vault
         transfer_checked(
             CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.token_program.key(),
                 TransferChecked {
                     from: ctx.accounts.maker_ata_a.to_account_info(),
                     to: ctx.accounts.vault.to_account_info(),
@@ -61,7 +61,7 @@ pub mod escrow {
 
         transfer_checked(
             CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.token_program.key(),
                 TransferChecked {
                     from: ctx.accounts.taker_ata_b.to_account_info(),
                     to: ctx.accounts.maker_ata_b.to_account_info(),
@@ -75,7 +75,7 @@ pub mod escrow {
 
         transfer_checked(
             CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.token_program.key(),
                 TransferChecked {
                     from: ctx.accounts.vault.to_account_info(),
                     to: ctx.accounts.taker_ata_a.to_account_info(),
@@ -89,7 +89,7 @@ pub mod escrow {
         )?;
 
         close_account(CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
+            ctx.accounts.token_program.key(),
             CloseAccount {
                 account: ctx.accounts.vault.to_account_info(),
                 destination: ctx.accounts.maker.to_account_info(),
@@ -113,7 +113,7 @@ pub mod escrow {
         // Refund Token A from vault → maker
         transfer_checked(
             CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                ctx.accounts.token_program.key(),
                 TransferChecked {
                     from: ctx.accounts.vault.to_account_info(),
                     to: ctx.accounts.maker_ata_a.to_account_info(),
@@ -128,7 +128,7 @@ pub mod escrow {
 
         // Close vault, return rent to maker
         close_account(CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
+            ctx.accounts.token_program.key(),
             CloseAccount {
                 account: ctx.accounts.vault.to_account_info(),
                 destination: ctx.accounts.maker.to_account_info(),
@@ -188,8 +188,8 @@ pub struct TakeEscrow<'info> {
     #[account(mut)]
     pub maker: UncheckedAccount<'info>,
 
-    pub mint_a: Account<'info, Mint>,
-    pub mint_b: Account<'info, Mint>,
+    pub mint_a: Box<Account<'info, Mint>>,
+    pub mint_b: Box<Account<'info, Mint>>,
 
     #[account(
         init_if_needed,
@@ -197,14 +197,14 @@ pub struct TakeEscrow<'info> {
         associated_token::mint = mint_a,
         associated_token::authority = taker,
     )]
-    pub taker_ata_a: Account<'info, TokenAccount>,
+    pub taker_ata_a: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
         associated_token::mint = mint_b,
         associated_token::authority = taker,
     )]
-    pub taker_ata_b: Account<'info, TokenAccount>,
+    pub taker_ata_b: Box<Account<'info, TokenAccount>>,
 
     #[account(
         init_if_needed,
@@ -212,7 +212,7 @@ pub struct TakeEscrow<'info> {
         associated_token::mint = mint_b,
         associated_token::authority = maker,
     )]
-    pub maker_ata_b: Account<'info, TokenAccount>,
+    pub maker_ata_b: Box<Account<'info, TokenAccount>>,
 
     #[account(
         mut,
@@ -223,14 +223,14 @@ pub struct TakeEscrow<'info> {
         seeds = [b"escrow", maker.key().as_ref(), escrow.seed.to_le_bytes().as_ref()],
         bump = escrow.escrow_bump,
     )]
-    pub escrow: Account<'info, Escrow>,
+    pub escrow: Box<Account<'info, Escrow>>,
 
     #[account(
         mut,
         seeds = [b"vault", escrow.key().as_ref()],
         bump = escrow.vault_bump,
     )]
-    pub vault: Account<'info, TokenAccount>,
+    pub vault: Box<Account<'info, TokenAccount>>,
 
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,

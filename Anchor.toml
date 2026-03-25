@@ -10,9 +10,6 @@ escrow = "Huid51EyAoXC4M1XLDDL756pRmmZZ1D7XCD3rowxX4hq"
 [programs.devnet]
 escrow = "Huid51EyAoXC4M1XLDDL756pRmmZZ1D7XCD3rowxX4hq"
 
-[registry]
-url = "https://api.apr.dev"
-
 [provider]
 cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
